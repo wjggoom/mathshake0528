@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>뒤죽박죽 우리 반 이름 찾기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gaegu:wght@400;700&family=Jua&family=Do+Hyeon&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #fef7ed;
+    --bg-deep: #fed7aa;
+    --ink: #1f2937;
+    --primary: #f97316;
+    --primary-deep: #ea580c;
+    --accent: #06b6d4;
+    --accent-deep: #0891b2;
+    --pink: #ec4899;
+    --yellow: #fbbf24;
+    --green: #10b981;
+    --purple: #8b5cf6;
+  }
+
+  body {
+    font-family: 'Jua', 'Gaegu', sans-serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(252, 211, 77, 0.25) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.1) 0%, transparent 70%);
+    min-height: 100vh;
+    overflow: hidden;
+    color: var(--ink);
+    user-select: none;
+  }
+
+  /* ===== 설정 화면 ===== */
+  .setup-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+  }
+
+  .setup-card {
+    background: white;
+    border: 4px solid var(--ink);
+    border-radius: 32px;
+    padding: 50px 60px;
+    max-width: 720px;
+    width: 100%;
+    box-shadow: 12px 12px 0 var(--ink);
+    position: relative;
+  }
+
+  .setup-card::before {
+    content: '✏️';
+    position: absolute;
+    top: -30px;
+    right: 40px;
+    font-size: 60px;
+    transform: rotate(15deg);
+  }
+
+  .setup-title {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 56px;
+    color: var(--primary-deep);
+    text-align: center;
+    margin-bottom: 12px;
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+
+  .setup-subtitle {
+    font-family: 'Gaegu', sans-serif;
+    font-size: 22px;
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 40px;
+    font-weight: 700;
+  }
+
+  .setup-label {
+    display: block;
+    font-size: 22px;
+    margin-bottom: 12px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .name-input {
+    width: 100%;
+    min-height: 220px;
+    padding: 20px;
+    font-family: 'Gaegu', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    background: #fffbeb;
+    resize: vertical;
+    line-height: 1.6;
+    transition: all 0.2s;
+  }
+
+  .name-input:focus {
+    outline: none;
+    background: white;
+    box-shadow: 6px 6px 0 var(--primary);
+    transform: translate(-3px, -3px);
+  }
+
+  .options-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 24px 0;
+  }
+
+  .option-box {
+    background: var(--bg-deep);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .option-box:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .option-box input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    accent-color: var(--primary-deep);
+  }
+
+  .option-box label {
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  .start-btn {
+    width: 100%;
+    padding: 24px;
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 36px;
+    color: white;
+    background: var(--primary-deep);
+    border: 4px solid var(--ink);
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: 16px;
+    box-shadow: 6px 6px 0 var(--ink);
+    transition: all 0.15s;
+    letter-spacing: 2px;
+  }
+
+  /* 문제 설정 토글 버튼 */
+  .toggle-names-btn {
+    width: 100%;
+    padding: 18px 20px;
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 22px;
+    color: var(--ink);
+    background: var(--bg-deep);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 5px 5px 0 var(--ink);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: space-between;
+  }
+
+  .toggle-names-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0 var(--ink);
+  }
+
+  .toggle-names-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--ink);
+  }
+
+  .toggle-icon {
+    font-size: 24px;
+  }
+
+  .toggle-text {
+    flex: 1;
+    text-align: left;
+  }
+
+  .toggle-arrow {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  .toggle-names-btn.open .toggle-arrow {
+    transform: rotate(180deg);
+  }
+
+  /* 접히는 이름 입력 영역 */
+  .names-collapse {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.3s ease,
+                margin 0.3s ease;
+    padding: 0 4px;
+  }
+
+  .names-collapse.open {
+    max-height: 600px;
+    padding: 20px 4px 0;
+  }
+
+  /* 라디오 옵션 박스 (출제 순서) */
+  .option-box input[type="radio"] {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    accent-color: var(--primary-deep);
+  }
+
+  .order-box {
+    position: relative;
+  }
+
+  .start-btn:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 9px 9px 0 var(--ink);
+  }
+
+  .start-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--ink);
+  }
+
+  .hint-text {
+    font-family: 'Gaegu', sans-serif;
+    font-size: 18px;
+    color: #9ca3af;
+    margin-top: 8px;
+    font-weight: 700;
+  }
+
+  /* ===== 게임 화면 ===== */
+  .game-screen {
+    display: none;
+    min-height: 100vh;
+    padding: 24px;
+    flex-direction: column;
+  }
+
+  .game-screen.active {
+    display: flex;
+  }
+
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .progress-pill {
+    background: white;
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    padding: 12px 28px;
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 28px;
+    box-shadow: 4px 4px 0 var(--ink);
+    color: var(--primary-deep);
+  }
+
+  .game-title {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 40px;
+    color: var(--ink);
+    letter-spacing: -1px;
+  }
+
+  .restart-btn {
+    background: var(--accent);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    padding: 12px 24px;
+    font-family: 'Jua', sans-serif;
+    font-size: 20px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--ink);
+    transition: all 0.15s;
+  }
+
+  .restart-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+
+  .puzzle-stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 400px;
+    gap: 20px;
+  }
+
+  .puzzle-board {
+    background: white;
+    border: 5px solid var(--ink);
+    border-radius: 32px;
+    box-shadow: 12px 12px 0 var(--ink);
+    position: relative;
+    width: min(720px, 62vw);
+    height: min(520px, 62vh);
+    overflow: hidden;
+  }
+
+  /* 왼쪽 찾은 친구 목록 패널 */
+  .found-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 200px;
+    max-height: min(520px, 62vh);
+  }
+
+  .found-panel-title {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 20px;
+    color: var(--ink);
+    text-align: center;
+    background: var(--green);
+    color: white;
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 4px 4px 0 var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .found-list {
+    flex: 1;
+    overflow-y: auto;
+    background: white;
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 4px 4px 0 var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .found-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  .found-list::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+  }
+  .found-list::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+  }
+
+  .found-item {
+    font-family: 'Jua', sans-serif;
+    font-size: 22px;
+    padding: 8px 14px;
+    background: #fffbeb;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: foundPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .found-item::before {
+    content: '✓';
+    color: var(--green);
+    font-weight: bold;
+    font-size: 20px;
+  }
+
+  .found-empty {
+    font-family: 'Gaegu', sans-serif;
+    font-size: 16px;
+    color: #9ca3af;
+    text-align: center;
+    padding: 20px 10px;
+    font-weight: 700;
+  }
+
+  @keyframes foundPop {
+    0% { transform: scale(0.3) translateX(-20px); opacity: 0; }
+    60% { transform: scale(1.1) translateX(0); opacity: 1; }
+    100% { transform: scale(1) translateX(0); opacity: 1; }
+  }
+
+  /* 오른쪽 힌트 패널 */
+  .hint-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 200px;
+  }
+
+  .hint-panel-title {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 22px;
+    color: var(--ink);
+    text-align: center;
+    background: var(--yellow);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 4px 4px 0 var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .hint-btn {
+    padding: 16px 12px;
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 22px;
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 5px 5px 0 var(--ink);
+    transition: all 0.15s;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+  }
+
+  .hint-btn:hover:not(:disabled) {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0 var(--ink);
+  }
+
+  .hint-btn:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--ink);
+  }
+
+  .hint-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .hint-btn.done {
+    background: #d1d5db !important;
+    color: #6b7280;
+  }
+
+  .hint-btn.done::after {
+    content: '✓';
+    position: absolute;
+    right: 12px;
+    color: var(--green);
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .hint-btn-push { background: var(--primary); }
+  .hint-btn-flip { background: var(--pink); }
+  .hint-btn-rotate { background: var(--purple); }
+
+  .puzzle-board::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 40px;
+    width: 30px;
+    height: 30px;
+    background: var(--yellow);
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+    z-index: 2;
+  }
+
+  .puzzle-board::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 90px;
+    width: 30px;
+    height: 30px;
+    background: var(--pink);
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+    z-index: 2;
+  }
+
+  /* 자유 배치되는 자모 */
+  .jamo {
+    position: absolute;
+    font-family: 'Black Han Sans', sans-serif;
+    line-height: 1;
+    color: var(--ink);
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                left 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                top 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                font-size 0.6s ease,
+                opacity 0.4s ease;
+    transform-origin: center center;
+    will-change: transform, left, top;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .jamo.color-1 { color: var(--primary-deep); }
+  .jamo.color-2 { color: var(--accent-deep); }
+  .jamo.color-3 { color: var(--pink); }
+  .jamo.color-4 { color: var(--green); }
+  .jamo.color-5 { color: var(--purple); }
+  .jamo.color-6 { color: var(--primary); }
+
+  /* 정답 라벨 (보드 위쪽 인라인) */
+  .answer-label-inline {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    font-family: 'Gaegu', sans-serif;
+    font-size: 40px;
+    color: var(--green);
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 4;
+    white-space: nowrap;
+  }
+
+  .final-letter {
+    z-index: 3;
+  }
+
+  /* 정답 화면 (구버전, 사용 안 함) */
+  .answer-display {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    z-index: 5;
+  }
+
+  .answer-display.show {
+    display: flex;
+    animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .answer-name {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 180px;
+    line-height: 1;
+    color: var(--primary-deep);
+    text-shadow:
+      6px 6px 0 var(--yellow),
+      12px 12px 0 var(--ink);
+    letter-spacing: 8px;
+  }
+
+  .answer-label {
+    font-family: 'Gaegu', sans-serif;
+    font-size: 36px;
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+    50% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+    70% { transform: scale(0.95) rotate(-2deg); }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+
+  /* 단계 표시 */
+  .step-indicator {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--yellow);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    padding: 8px 24px;
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 24px;
+    color: var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 3;
+    white-space: nowrap;
+  }
+
+  .step-indicator.show {
+    opacity: 1;
+  }
+
+  /* 컨트롤 버튼 */
+  .controls {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 24px;
+    min-height: 86px;
+    align-items: center;
+  }
+
+  .control-btn {
+    padding: 18px 44px;
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 28px;
+    border: 4px solid var(--ink);
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 6px 6px 0 var(--ink);
+    transition: all 0.15s;
+    letter-spacing: 1px;
+  }
+
+  .control-btn:hover:not(:disabled) {
+    transform: translate(-3px, -3px);
+    box-shadow: 9px 9px 0 var(--ink);
+  }
+
+  .control-btn:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--ink);
+  }
+
+  .control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .reveal-btn { background: var(--yellow); color: var(--ink); }
+  .next-btn { background: var(--green); color: white; }
+  .shuffle-btn { background: var(--accent); color: white; }
+
+  /* 뾰로롱 효과 */
+  .sparkle {
+    position: absolute;
+    pointer-events: none;
+    font-size: 50px;
+    animation: sparkleFloat 1.4s ease-out forwards;
+    z-index: 100;
+  }
+
+  @keyframes sparkleFloat {
+    0% { opacity: 0; transform: translate(0, 0) scale(0) rotate(0deg); }
+    20% { opacity: 1; transform: translate(var(--tx, 0), var(--ty, 0)) scale(1.3) rotate(180deg); }
+    100% { opacity: 0; transform: translate(calc(var(--tx, 0) * 2), calc(var(--ty, 0) * 2 - 100px)) scale(0.3) rotate(360deg); }
+  }
+
+  /* 완료 화면 */
+  .finish-screen {
+    display: none;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .finish-screen.show {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .finish-title {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 100px;
+    color: var(--primary-deep);
+    text-shadow: 6px 6px 0 var(--yellow), 12px 12px 0 var(--ink);
+    margin-bottom: 20px;
+    letter-spacing: -2px;
+  }
+
+  .finish-emoji {
+    font-size: 120px;
+    margin: 30px 0;
+    animation: wiggle 1s ease-in-out infinite;
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+  }
+
+  .finish-message {
+    font-family: 'Jua', sans-serif;
+    font-size: 32px;
+    color: var(--ink);
+    margin-bottom: 40px;
+  }
+
+  .floating-deco {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0.5;
+    animation: floatAround 20s ease-in-out infinite;
+    z-index: -1;
+  }
+
+  .deco-1 { top: 10%; left: 5%; font-size: 60px; animation-delay: 0s; }
+  .deco-2 { top: 70%; left: 8%; font-size: 50px; animation-delay: -5s; }
+  .deco-3 { top: 20%; right: 7%; font-size: 70px; animation-delay: -10s; }
+  .deco-4 { bottom: 15%; right: 10%; font-size: 55px; animation-delay: -15s; }
+
+  @keyframes floatAround {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(20px, -30px) rotate(10deg); }
+    50% { transform: translate(-15px, 20px) rotate(-8deg); }
+    75% { transform: translate(25px, 15px) rotate(5deg); }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="floating-deco deco-1">⭐</div>
+<div class="floating-deco deco-2">✨</div>
+<div class="floating-deco deco-3">🎈</div>
+<div class="floating-deco deco-4">🌟</div>
+
+<!-- ===== 설정 화면 ===== -->
+<div class="setup-screen" id="setupScreen">
+  <div class="setup-card">
+    <h1 class="setup-title">뒤죽박죽<br>우리 반 이름 찾기</h1>
+    <p class="setup-subtitle">🎯 도형의 밀기 · 뒤집기 · 돌리기로 친구 이름을 찾아라!</p>
+
+    <button class="toggle-names-btn" id="toggleNamesBtn" type="button">
+      <span class="toggle-icon">📝</span>
+      <span class="toggle-text">문제 설정 (이름 입력)</span>
+      <span class="toggle-arrow">▼</span>
+    </button>
+
+    <div class="names-collapse" id="namesCollapse">
+      <label class="setup-label" for="nameList">👦👧 우리 반 친구들 이름</label>
+      <textarea
+        id="nameList"
+        class="name-input"
+        placeholder="한 줄에 한 명씩 이름을 적어주세요"
+      >초등학교
+홍길동
+꿈행성</textarea>
+      <p class="hint-text">💡 한 줄에 한 명씩 입력하세요</p>
+    </div>
+
+    <label class="setup-label" style="margin-top:24px;">🎲 출제 순서</label>
+    <div class="options-row">
+      <div class="option-box order-box" data-order="random">
+        <input type="radio" name="orderMode" id="orderRandom" value="random" checked>
+        <label for="orderRandom">🎲 랜덤 순서</label>
+      </div>
+      <div class="option-box order-box" data-order="sequential">
+        <input type="radio" name="orderMode" id="orderSequential" value="sequential">
+        <label for="orderSequential">📋 입력한 순서</label>
+      </div>
+    </div>
+
+    <label class="setup-label">🔧 변환 방법</label>
+    <div class="options-row">
+      <div class="option-box">
+        <input type="checkbox" id="optFlip" checked>
+        <label for="optFlip">🔄 뒤집기 사용</label>
+      </div>
+      <div class="option-box">
+        <input type="checkbox" id="optRotate" checked>
+        <label for="optRotate">🔁 돌리기 사용</label>
+      </div>
+    </div>
+
+    <button class="start-btn" id="startBtn">시작하기 🚀</button>
+  </div>
+</div>
+
+<!-- ===== 게임 화면 ===== -->
+<div class="game-screen" id="gameScreen">
+  <div class="game-header">
+    <div class="progress-pill" id="progressPill">1 / 16</div>
+    <h2 class="game-title">🔍 이 이름은 누구일까?</h2>
+    <button class="restart-btn" id="restartBtn">처음으로</button>
+  </div>
+
+  <div class="puzzle-stage" id="puzzleStage">
+    <div class="found-panel" id="foundPanel">
+      <div class="found-panel-title">🎉 되찾은 친구</div>
+      <div class="found-list" id="foundList">
+        <div class="found-empty" id="foundEmpty">아직 없어요!<br>첫 번째 친구를<br>찾아볼까요?</div>
+      </div>
+    </div>
+
+    <div class="puzzle-board" id="puzzleBoard">
+      <div class="step-indicator" id="stepIndicator"></div>
+      <div class="answer-display" id="answerDisplay">
+        <div class="answer-label">✨ 정답은 ✨</div>
+        <div class="answer-name" id="answerName"></div>
+      </div>
+    </div>
+
+    <div class="hint-panel" id="hintPanel">
+      <div class="hint-panel-title">💡 힌트 단계</div>
+      <button class="hint-btn hint-btn-push" id="hintPushBtn">✋ 밀기</button>
+      <button class="hint-btn hint-btn-flip" id="hintFlipBtn">🔄 뒤집기</button>
+      <button class="hint-btn hint-btn-rotate" id="hintRotateBtn">🔁 돌리기</button>
+    </div>
+  </div>
+
+  <div class="controls" id="controls">
+    <button class="control-btn shuffle-btn" id="shuffleBtn">🎲 다시 섞기</button>
+    <button class="control-btn reveal-btn" id="revealBtn">🎉 정답 확인</button>
+    <button class="control-btn next-btn" id="nextBtn" style="display:none;">다음 친구 →</button>
+  </div>
+
+  <div class="finish-screen" id="finishScreen">
+    <h2 class="finish-title">모두 찾았어요!</h2>
+    <div class="finish-emoji">🎊</div>
+    <p class="finish-message">우리 반 친구들 이름을 모두 되찾았어요!<br>이제 밀고, 뒤집고, 돌리는 공부를 본격적으로 시작해볼까요?</p>
+    <button class="control-btn next-btn" id="finishRestartBtn">처음으로 돌아가기</button>
+  </div>
+</div>
+
+<script>
+  // ===== 한글 자모 분리 =====
+  const CHO_LIST = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  const JUNG_LIST = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+  const JONG_LIST = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+  // 한 글자를 자모 배열로 분리. 각 원소는 { jamo, role } (role: 'cho'|'jung'|'jong')
+  function decomposeChar(char) {
+    const code = char.charCodeAt(0);
+    if (code < 0xAC00 || code > 0xD7A3) {
+      return [{ jamo: char, role: 'cho' }];
+    }
+    const offset = code - 0xAC00;
+    const choIdx = Math.floor(offset / 588);
+    const jungIdx = Math.floor((offset % 588) / 28);
+    const jongIdx = offset % 28;
+
+    const parts = [
+      { jamo: CHO_LIST[choIdx], role: 'cho' },
+      { jamo: JUNG_LIST[jungIdx], role: 'jung' }
+    ];
+    if (jongIdx > 0) {
+      parts.push({ jamo: JONG_LIST[jongIdx], role: 'jong' });
+    }
+    return parts;
+  }
+
+  // ===== 변환 =====
+  function getRandomTransform(useFlip, useRotate) {
+    const transforms = [];
+    if (useFlip) {
+      transforms.push({ rotate: 0, scaleX: -1, scaleY: 1, type: 'flip' });
+      transforms.push({ rotate: 0, scaleX: 1, scaleY: -1, type: 'flip' });
+    }
+    if (useRotate) {
+      transforms.push({ rotate: 90, scaleX: 1, scaleY: 1, type: 'rotate' });
+      transforms.push({ rotate: 180, scaleX: 1, scaleY: 1, type: 'rotate' });
+      transforms.push({ rotate: 270, scaleX: 1, scaleY: 1, type: 'rotate' });
+    }
+    if (transforms.length === 0) {
+      transforms.push({ rotate: 180, scaleX: 1, scaleY: 1, type: 'rotate' });
+    }
+    return transforms[Math.floor(Math.random() * transforms.length)];
+  }
+
+  function transformToCSS(t) {
+    return `rotate(${t.rotate}deg) scaleX(${t.scaleX}) scaleY(${t.scaleY})`;
+  }
+
+  // ===== 게임 상태 =====
+  let names = [];
+  let shuffledOrder = [];
+  let currentIdx = 0;
+  let useFlip = true;
+  let useRotate = true;
+  let revealed = false;
+  let isAnimating = false;
+  let currentJamoData = [];
+  let foundNames = []; // 정답 확인한 이름 목록
+
+  // 힌트 단계 진행 상태
+  let pushDone = false;
+  let flipDone = false;
+  let rotateDone = false;
+
+  // ===== DOM =====
+  const setupScreen = document.getElementById('setupScreen');
+  const gameScreen = document.getElementById('gameScreen');
+  const nameListEl = document.getElementById('nameList');
+  const optFlipEl = document.getElementById('optFlip');
+  const optRotateEl = document.getElementById('optRotate');
+  const startBtn = document.getElementById('startBtn');
+  const toggleNamesBtn = document.getElementById('toggleNamesBtn');
+  const namesCollapse = document.getElementById('namesCollapse');
+  const restartBtn = document.getElementById('restartBtn');
+  const finishRestartBtn = document.getElementById('finishRestartBtn');
+  const progressPill = document.getElementById('progressPill');
+  const puzzleBoard = document.getElementById('puzzleBoard');
+  const puzzleStage = document.getElementById('puzzleStage');
+  const answerDisplay = document.getElementById('answerDisplay');
+  const answerName = document.getElementById('answerName');
+  const stepIndicator = document.getElementById('stepIndicator');
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  const revealBtn = document.getElementById('revealBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const finishScreen = document.getElementById('finishScreen');
+  const controls = document.getElementById('controls');
+  const hintPanel = document.getElementById('hintPanel');
+  const hintPushBtn = document.getElementById('hintPushBtn');
+  const hintFlipBtn = document.getElementById('hintFlipBtn');
+  const hintRotateBtn = document.getElementById('hintRotateBtn');
+  const foundPanel = document.getElementById('foundPanel');
+  const foundList = document.getElementById('foundList');
+  const foundEmpty = document.getElementById('foundEmpty');
+
+  startBtn.addEventListener('click', () => {
+    const lines = nameListEl.value.split('\n').map(s => s.trim()).filter(Boolean);
+    if (lines.length === 0) {
+      alert('이름을 한 명 이상 입력해주세요!');
+      return;
+    }
+    names = lines;
+    useFlip = optFlipEl.checked;
+    useRotate = optRotateEl.checked;
+    if (!useFlip && !useRotate) {
+      alert('뒤집기 또는 돌리기 중 하나는 반드시 선택해야 합니다!');
+      return;
+    }
+    // 출제 순서 옵션 확인
+    const orderMode = document.querySelector('input[name="orderMode"]:checked').value;
+    if (orderMode === 'random') {
+      shuffledOrder = shuffleArray([...Array(names.length).keys()]);
+    } else {
+      // 입력한 순서대로
+      shuffledOrder = [...Array(names.length).keys()];
+    }
+    currentIdx = 0;
+    foundNames = [];
+    renderFoundList();
+    setupScreen.style.display = 'none';
+    gameScreen.classList.add('active');
+    finishScreen.classList.remove('show');
+    puzzleBoard.style.display = 'block';
+    foundPanel.style.display = 'flex';
+    controls.style.display = 'flex';
+    showProblem();
+  });
+
+  // 문제 설정 토글 버튼
+  toggleNamesBtn.addEventListener('click', () => {
+    const isOpen = namesCollapse.classList.toggle('open');
+    toggleNamesBtn.classList.toggle('open', isOpen);
+    toggleNamesBtn.querySelector('.toggle-text').textContent =
+      isOpen ? '문제 설정 (이름 숨기기)' : '문제 설정 (이름 입력)';
+  });
+
+  restartBtn.addEventListener('click', backToSetup);
+  finishRestartBtn.addEventListener('click', backToSetup);
+
+  function backToSetup() {
+    setupScreen.style.display = 'flex';
+    gameScreen.classList.remove('active');
+    finishScreen.classList.remove('show');
+    // 완료 화면에서 숨겼던 요소들 복원
+    document.querySelector('.game-header').style.display = '';
+    puzzleStage.style.display = '';
+    controls.style.display = '';
+  }
+
+  function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // 찾은 친구 목록 렌더링
+  function renderFoundList() {
+    foundList.innerHTML = '';
+    if (foundNames.length === 0) {
+      const empty = document.createElement('div');
+      empty.classList.add('found-empty');
+      empty.innerHTML = '아직 없어요!<br>첫 번째 친구를<br>찾아볼까요?';
+      foundList.appendChild(empty);
+      return;
+    }
+    foundNames.forEach(name => {
+      const item = document.createElement('div');
+      item.classList.add('found-item');
+      item.textContent = name;
+      foundList.appendChild(item);
+    });
+    // 가장 최근 추가된 항목으로 스크롤
+    foundList.scrollTop = foundList.scrollHeight;
+  }
+
+  function showProblem() {
+    revealed = false;
+    isAnimating = false;
+    pushDone = false;
+    flipDone = false;
+    rotateDone = false;
+    updateHintButtons();
+    const realIdx = shuffledOrder[currentIdx];
+    progressPill.textContent = `${currentIdx + 1} / ${names.length}`;
+    answerDisplay.classList.remove('show');
+    stepIndicator.classList.remove('show');
+    revealBtn.style.display = 'inline-block';
+    revealBtn.style.visibility = 'visible';
+    revealBtn.disabled = false;
+    shuffleBtn.style.display = 'inline-block';
+    shuffleBtn.style.visibility = 'visible';
+    shuffleBtn.disabled = false;
+    nextBtn.style.display = 'none';
+    hintPanel.style.display = 'flex';
+
+    renderScrambled(names[realIdx]);
+  }
+
+  // 힌트 버튼 상태 업데이트
+  function updateHintButtons() {
+    // 완료 표시 토글
+    hintPushBtn.classList.toggle('done', pushDone);
+    hintFlipBtn.classList.toggle('done', flipDone);
+    hintRotateBtn.classList.toggle('done', rotateDone);
+
+    // disabled 상태를 매번 명시적으로 리셋
+    // 밀기는 항상 가능 (완료된 경우만 done 처리로 비활성화 효과)
+    hintPushBtn.disabled = pushDone;
+    // 뒤집기/돌리기는 옵션 미사용이거나 이미 완료된 경우 비활성화
+    hintFlipBtn.disabled = !useFlip || flipDone;
+    hintRotateBtn.disabled = !useRotate || rotateDone;
+  }
+
+  /**
+   * 자모를 분리해서 흩뿌리기.
+   * 각 자모 데이터:
+   *  - el: DOM 엘리먼트
+   *  - jamo: 글자
+   *  - role: cho|jung|jong
+   *  - syllableIdx: 음절 인덱스 (어느 글자에 속하는지)
+   *  - appliedTransform: 적용된 변환
+   *  - randomX, randomY: 흩어진 위치
+   *  - assemblyX, assemblyY: 음절별로 모일 때 위치 (자모 단위로 한 줄 배치)
+   *  - finalLetterX, finalLetterY: 합쳐진 완성 글자가 놓일 위치
+   */
+  function renderScrambled(name) {
+    document.querySelectorAll('.jamo').forEach(el => el.remove());
+    document.querySelectorAll('.answer-label-inline').forEach(el => el.remove());
+    answerDisplay.classList.remove('show');
+    currentJamoData = [];
+    placedPositions.length = 0;
+
+    const boardRect = puzzleBoard.getBoundingClientRect();
+    const boardW = boardRect.width;
+    const boardH = boardRect.height;
+
+    // 자모를 음절별로 분리
+    const syllables = Array.from(name).map(decomposeChar);
+    const totalJamoCount = syllables.reduce((sum, s) => sum + s.length, 0);
+
+    // 흩뿌리는 자모 크기
+    const jamoSize = 90;
+    const padding = 30;
+    const minX = padding;
+    const maxX = boardW - jamoSize - padding;
+    const minY = padding + 40;
+    const maxY = boardH - jamoSize - padding;
+
+    // 2단계: 음절별로 모일 때의 좌표 계산
+    // 각 음절은 자모 N개가 한 줄로 배열되어 표시됨 (회색 영역 같은 느낌)
+    // 음절 그룹 자체가 가로로 정렬됨
+    const assemblyJamoSize = 70; // 모일 때 살짝 작게
+    const syllableSpacing = 30;
+    const syllableWidths = syllables.map(s => s.length * assemblyJamoSize + (s.length - 1) * 6);
+    const totalAssemblyWidth = syllableWidths.reduce((a, b) => a + b, 0) + (syllables.length - 1) * syllableSpacing;
+    let assemblyStartX = (boardW - totalAssemblyWidth) / 2;
+    const assemblyY = boardH / 2 - assemblyJamoSize / 2;
+
+    const syllableAssemblyXs = [];
+    let cursor = assemblyStartX;
+    for (let i = 0; i < syllables.length; i++) {
+      syllableAssemblyXs.push(cursor);
+      cursor += syllableWidths[i] + syllableSpacing;
+    }
+
+    // 3단계: 완성된 글자가 놓일 위치
+    const finalLetterSize = 130;
+    const finalLetterGap = 20;
+    const totalFinalWidth = syllables.length * finalLetterSize + (syllables.length - 1) * finalLetterGap;
+    const finalStartX = (boardW - totalFinalWidth) / 2;
+    const finalY = boardH / 2 - finalLetterSize / 2;
+
+    // 자모 생성
+    syllables.forEach((syllable, sylIdx) => {
+      syllable.forEach((partInfo, partIdx) => {
+        const span = document.createElement('span');
+        span.classList.add('jamo');
+        const colorIdx = (sylIdx % 6) + 1;
+        span.classList.add(`color-${colorIdx}`);
+        span.textContent = partInfo.jamo;
+        span.style.fontSize = `${jamoSize}px`;
+        span.style.width = `${jamoSize}px`;
+        span.style.height = `${jamoSize}px`;
+
+        const transform = getRandomTransform(useFlip, useRotate);
+
+        // 흩뿌릴 위치
+        const pos = getRandomPositionNonOverlapping(minX, maxX, minY, maxY, jamoSize);
+
+        span.style.left = `${pos.x}px`;
+        span.style.top = `${pos.y}px`;
+        span.style.transform = transformToCSS(transform);
+
+        puzzleBoard.appendChild(span);
+
+        // 음절 내에서 자모가 모일 위치 (한 줄로)
+        const assemblyX = syllableAssemblyXs[sylIdx] + partIdx * (assemblyJamoSize + 6);
+
+        // 완성된 글자가 놓일 위치 (같은 음절의 자모는 모두 같은 좌표로 모임)
+        const finalLetterX = finalStartX + sylIdx * (finalLetterSize + finalLetterGap);
+
+        currentJamoData.push({
+          el: span,
+          jamo: partInfo.jamo,
+          role: partInfo.role,
+          syllableIdx: sylIdx,
+          partIdx: partIdx,
+          appliedTransform: transform,
+          jamoSize: jamoSize,
+          assemblyJamoSize: assemblyJamoSize,
+          finalLetterSize: finalLetterSize,
+          assemblyX: assemblyX,
+          assemblyY: assemblyY,
+          finalX: finalLetterX,
+          finalY: finalY
+        });
+      });
+    });
+  }
+
+  const placedPositions = [];
+  function getRandomPositionNonOverlapping(minX, maxX, minY, maxY, size) {
+    const minDist = size * 0.85;
+    let attempts = 0;
+    while (attempts < 80) {
+      const x = minX + Math.random() * (maxX - minX);
+      const y = minY + Math.random() * (maxY - minY);
+      let overlap = false;
+      for (const p of placedPositions) {
+        const dx = x - p.x;
+        const dy = y - p.y;
+        if (Math.sqrt(dx * dx + dy * dy) < minDist) {
+          overlap = true;
+          break;
+        }
+      }
+      if (!overlap) {
+        placedPositions.push({ x, y });
+        return { x, y };
+      }
+      attempts++;
+    }
+    const x = minX + Math.random() * (maxX - minX);
+    const y = minY + Math.random() * (maxY - minY);
+    placedPositions.push({ x, y });
+    return { x, y };
+  }
+
+  shuffleBtn.addEventListener('click', () => {
+    if (revealed || isAnimating) return;
+    pushDone = false;
+    flipDone = false;
+    rotateDone = false;
+    updateHintButtons();
+    const realIdx = shuffledOrder[currentIdx];
+    renderScrambled(names[realIdx]);
+  });
+
+  // ===== 힌트: 밀기만 적용 =====
+  hintPushBtn.addEventListener('click', async () => {
+    if (isAnimating || revealed || pushDone) return;
+    isAnimating = true;
+    shuffleBtn.disabled = true;
+    revealBtn.disabled = true;
+    hintPushBtn.disabled = true;
+    hintFlipBtn.disabled = true;
+    hintRotateBtn.disabled = true;
+
+    stepIndicator.textContent = '✋ 밀어서 음절끼리 모이기!';
+    stepIndicator.classList.add('show');
+    await sleep(400);
+
+    playWhoosh();
+    currentJamoData.forEach(data => {
+      data.el.style.left = `${data.assemblyX}px`;
+      data.el.style.top = `${data.assemblyY}px`;
+      data.el.style.fontSize = `${data.assemblyJamoSize}px`;
+      data.el.style.width = `${data.assemblyJamoSize}px`;
+      data.el.style.height = `${data.assemblyJamoSize}px`;
+    });
+    await sleep(1000);
+    stepIndicator.classList.remove('show');
+
+    pushDone = true;
+    isAnimating = false;
+    shuffleBtn.disabled = false;
+    revealBtn.disabled = false;
+    updateHintButtons();
+  });
+
+  // ===== 힌트: 뒤집기만 풀기 =====
+  hintFlipBtn.addEventListener('click', async () => {
+    if (isAnimating || revealed || flipDone) return;
+    isAnimating = true;
+    shuffleBtn.disabled = true;
+    revealBtn.disabled = true;
+    hintPushBtn.disabled = true;
+    hintFlipBtn.disabled = true;
+    hintRotateBtn.disabled = true;
+
+    stepIndicator.textContent = '🔄 뒤집기로 좌우/상하 바로잡기!';
+    stepIndicator.classList.add('show');
+    await sleep(400);
+
+    // 적용된 변환 중 flip 타입만 풀기
+    const flipTargets = currentJamoData.filter(d => d.appliedTransform.type === 'flip');
+    // 위치 순서대로 정렬
+    flipTargets.sort((a, b) => {
+      if (a.syllableIdx !== b.syllableIdx) return a.syllableIdx - b.syllableIdx;
+      return a.partIdx - b.partIdx;
+    });
+
+    for (const data of flipTargets) {
+      playFlip();
+      // flip은 풀고 rotate 부분은 그대로 유지 (현재는 flip이면 rotate=0이라 그냥 원본으로)
+      data.el.style.transform = 'rotate(0deg) scaleX(1) scaleY(1)';
+      data.appliedTransform = { rotate: 0, scaleX: 1, scaleY: 1, type: 'none' };
+      await sleep(200);
+    }
+    await sleep(400);
+    stepIndicator.classList.remove('show');
+
+    flipDone = true;
+    isAnimating = false;
+    shuffleBtn.disabled = false;
+    revealBtn.disabled = false;
+    updateHintButtons();
+  });
+
+  // ===== 힌트: 돌리기만 풀기 =====
+  hintRotateBtn.addEventListener('click', async () => {
+    if (isAnimating || revealed || rotateDone) return;
+    isAnimating = true;
+    shuffleBtn.disabled = true;
+    revealBtn.disabled = true;
+    hintPushBtn.disabled = true;
+    hintFlipBtn.disabled = true;
+    hintRotateBtn.disabled = true;
+
+    stepIndicator.textContent = '🔁 돌리기로 방향 바로잡기!';
+    stepIndicator.classList.add('show');
+    await sleep(400);
+
+    const rotateTargets = currentJamoData.filter(d => d.appliedTransform.type === 'rotate');
+    rotateTargets.sort((a, b) => {
+      if (a.syllableIdx !== b.syllableIdx) return a.syllableIdx - b.syllableIdx;
+      return a.partIdx - b.partIdx;
+    });
+
+    for (const data of rotateTargets) {
+      playRotate();
+      data.el.style.transform = 'rotate(0deg) scaleX(1) scaleY(1)';
+      data.appliedTransform = { rotate: 0, scaleX: 1, scaleY: 1, type: 'none' };
+      await sleep(200);
+    }
+    await sleep(400);
+    stepIndicator.classList.remove('show');
+
+    rotateDone = true;
+    isAnimating = false;
+    shuffleBtn.disabled = false;
+    revealBtn.disabled = false;
+    updateHintButtons();
+  });
+
+  // ===== 정답 확인 (남은 단계만 처리) =====
+  revealBtn.addEventListener('click', async () => {
+    if (isAnimating) return;
+    isAnimating = true;
+    revealBtn.disabled = true;
+    shuffleBtn.disabled = true;
+    hintPushBtn.disabled = true;
+    hintFlipBtn.disabled = true;
+    hintRotateBtn.disabled = true;
+
+    // === 1단계: 밀기 (아직 안 했으면) ===
+    if (!pushDone) {
+      stepIndicator.textContent = '✋ 밀어서 음절끼리 모이기!';
+      stepIndicator.classList.add('show');
+      await sleep(400);
+
+      playWhoosh();
+      currentJamoData.forEach(data => {
+        data.el.style.left = `${data.assemblyX}px`;
+        data.el.style.top = `${data.assemblyY}px`;
+        data.el.style.fontSize = `${data.assemblyJamoSize}px`;
+        data.el.style.width = `${data.assemblyJamoSize}px`;
+        data.el.style.height = `${data.assemblyJamoSize}px`;
+      });
+      await sleep(1000);
+      pushDone = true;
+    }
+
+    // === 2단계: 뒤집기/돌리기 (아직 안 풀린 변환만) ===
+    const remaining = currentJamoData.filter(d => d.appliedTransform.type !== 'none');
+    if (remaining.length > 0) {
+      stepIndicator.textContent = '🔄 뒤집고 돌려서 바르게 세우기!';
+      stepIndicator.classList.add('show');
+      await sleep(500);
+
+      remaining.sort((a, b) => {
+        if (a.syllableIdx !== b.syllableIdx) return a.syllableIdx - b.syllableIdx;
+        return a.partIdx - b.partIdx;
+      });
+
+      for (const data of remaining) {
+        // 변환 종류에 맞는 효과음 재생
+        if (data.appliedTransform.type === 'flip') {
+          playFlip();
+        } else if (data.appliedTransform.type === 'rotate') {
+          playRotate();
+        }
+        data.el.style.transform = 'rotate(0deg) scaleX(1) scaleY(1)';
+        data.appliedTransform = { rotate: 0, scaleX: 1, scaleY: 1, type: 'none' };
+        await sleep(180);
+      }
+      await sleep(400);
+    }
+
+    // === 3단계: 음절 합치기 ===
+    stepIndicator.textContent = '🧩 자음과 모음이 합쳐져요!';
+    stepIndicator.classList.add('show');
+    await sleep(500);
+
+    currentJamoData.forEach(data => {
+      data.el.style.left = `${data.finalX}px`;
+      data.el.style.top = `${data.finalY}px`;
+      data.el.style.fontSize = `${data.finalLetterSize * 0.5}px`;
+      data.el.style.opacity = '0';
+    });
+
+    const realIdx = shuffledOrder[currentIdx];
+    const name = names[realIdx];
+    const syllables = Array.from(name);
+
+    setTimeout(() => {
+      currentJamoData.forEach(d => d.el.remove());
+
+      const boardRect = puzzleBoard.getBoundingClientRect();
+      const boardW = boardRect.width;
+      const boardH = boardRect.height;
+      // 보드 크기에 맞춰 동적으로 글자 크기 결정 (튀지 않게)
+      const maxLetterSize = Math.min(160, (boardW - 80) / syllables.length - 20);
+      const finalLetterSize = Math.max(110, maxLetterSize);
+      const finalLetterGap = 24;
+      const totalFinalWidth = syllables.length * finalLetterSize + (syllables.length - 1) * finalLetterGap;
+      const finalStartX = (boardW - totalFinalWidth) / 2;
+      // 살짝 아래로 (라벨 공간 확보)
+      const finalY = boardH / 2 - finalLetterSize / 2 + 20;
+
+      syllables.forEach((char, idx) => {
+        const span = document.createElement('span');
+        span.classList.add('jamo', 'final-letter');
+        const colorIdx = (idx % 6) + 1;
+        span.classList.add(`color-${colorIdx}`);
+        span.textContent = char;
+        span.style.fontSize = `${finalLetterSize}px`;
+        span.style.width = `${finalLetterSize}px`;
+        span.style.height = `${finalLetterSize}px`;
+        span.style.left = `${finalStartX + idx * (finalLetterSize + finalLetterGap)}px`;
+        span.style.top = `${finalY}px`;
+        span.style.transform = 'scale(0.3)';
+        span.style.opacity = '0';
+        // 정답 글자에 그림자 효과
+        span.style.textShadow = '4px 4px 0 var(--yellow), 8px 8px 0 var(--ink)';
+        puzzleBoard.appendChild(span);
+
+        setTimeout(() => {
+          span.style.transform = 'scale(1)';
+          span.style.opacity = '1';
+        }, idx * 120);
+      });
+
+      // 정답 라벨을 보드 위쪽에 페이드인
+      setTimeout(() => {
+        const label = document.createElement('div');
+        label.classList.add('answer-label-inline');
+        label.textContent = '✨ 정답은 ✨';
+        puzzleBoard.appendChild(label);
+        requestAnimationFrame(() => {
+          label.style.opacity = '1';
+          label.style.transform = 'translateX(-50%) translateY(0)';
+        });
+      }, syllables.length * 120 + 200);
+    }, 700);
+
+    await sleep(700 + syllables.length * 120 + 800);
+
+    // === 4단계: 정답 확정 (화면 튐 없이 마무리) ===
+    stepIndicator.classList.remove('show');
+
+    // 찾은 친구 목록에 추가
+    if (!foundNames.includes(name)) {
+      foundNames.push(name);
+      renderFoundList();
+    }
+
+    revealed = true;
+    // display:none 대신 visibility로 처리하여 레이아웃 점프 방지
+    revealBtn.style.visibility = 'hidden';
+    shuffleBtn.style.visibility = 'hidden';
+    // 힌트 패널은 그대로 두고 버튼만 비활성화 (오른쪽 공간 유지)
+    hintPushBtn.disabled = true;
+    hintFlipBtn.disabled = true;
+    hintRotateBtn.disabled = true;
+
+    nextBtn.textContent = currentIdx < names.length - 1 ? '다음 친구 →' : '🎊 모두 끝!';
+    nextBtn.style.display = 'inline-block';
+
+    playSparkles();
+    playChime();
+    isAnimating = false;
+  });
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (currentIdx < names.length - 1) {
+      currentIdx++;
+      hintPanel.style.display = 'flex';
+      showProblem();
+    } else {
+      // 게임 화면의 다른 요소들을 모두 숨기고 완료 화면만 가운데에 표시
+      document.querySelector('.game-header').style.display = 'none';
+      puzzleStage.style.display = 'none';
+      controls.style.display = 'none';
+      finishScreen.classList.add('show');
+      playSparkles(40);
+      playChime();
+    }
+  });
+
+  function playSparkles(count = 25) {
+    const sparkleChars = ['✨','⭐','🌟','💫','🎉','🎊','💖','🌈'];
+    const rect = puzzleStage.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        const s = document.createElement('div');
+        s.classList.add('sparkle');
+        s.textContent = sparkleChars[Math.floor(Math.random() * sparkleChars.length)];
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 100 + Math.random() * 300;
+        s.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+        s.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+        s.style.left = `${centerX}px`;
+        s.style.top = `${centerY}px`;
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 1500);
+      }, i * 40);
+    }
+  }
+
+  // AudioContext 재사용 (브라우저 정책상 사용자 상호작용 후에만 작동)
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) {
+        return null;
+      }
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  // 화이트노이즈 버퍼 생성 (캐싱)
+  let noiseBuffer = null;
+  function getNoiseBuffer(ctx) {
+    if (noiseBuffer) return noiseBuffer;
+    const bufferSize = ctx.sampleRate * 2; // 2초 분량
+    noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    return noiseBuffer;
+  }
+
+  // ===== 밀기 효과음: 휙 바람 소리 =====
+  function playWhoosh() {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    try {
+      const noise = ctx.createBufferSource();
+      noise.buffer = getNoiseBuffer(ctx);
+
+      // 밴드패스 필터로 바람 느낌 만들기
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.Q.value = 0.8;
+      // 피치 슬라이드: 낮은 주파수 → 높은 주파수 → 다시 낮아짐
+      filter.frequency.setValueAtTime(400, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(1800, ctx.currentTime + 0.25);
+      filter.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.7);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      noise.start();
+      noise.stop(ctx.currentTime + 0.7);
+    } catch (e) {}
+  }
+
+  // ===== 뒤집기 효과음: 종이 뒤집히는 짧고 탁한 소리 =====
+  function playFlip() {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    try {
+      // 1) 노이즈 부분 (종이 휘는 소리)
+      const noise = ctx.createBufferSource();
+      noise.buffer = getNoiseBuffer(ctx);
+
+      const noiseFilter = ctx.createBiquadFilter();
+      noiseFilter.type = 'highpass';
+      noiseFilter.frequency.value = 2000;
+
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0, ctx.currentTime);
+      noiseGain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noise.start();
+      noise.stop(ctx.currentTime + 0.2);
+
+      // 2) 짧은 톤 (탁 하는 느낌)
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+
+      const oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(0, ctx.currentTime);
+      oscGain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.01);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+
+      osc.connect(oscGain);
+      oscGain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.15);
+    } catch (e) {}
+  }
+
+  // ===== 돌리기 효과음: 부드럽게 회전하는 상승음 =====
+  function playRotate() {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    try {
+      // 사인파로 회전 느낌
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.35);
+
+      const oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(0, ctx.currentTime);
+      oscGain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.05);
+      oscGain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.25);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+
+      osc.connect(oscGain);
+      oscGain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.5);
+
+      // 살짝의 노이즈 (회전하는 마찰감)
+      const noise = ctx.createBufferSource();
+      noise.buffer = getNoiseBuffer(ctx);
+
+      const noiseFilter = ctx.createBiquadFilter();
+      noiseFilter.type = 'bandpass';
+      noiseFilter.Q.value = 5;
+      noiseFilter.frequency.setValueAtTime(600, ctx.currentTime);
+      noiseFilter.frequency.exponentialRampToValueAtTime(1500, ctx.currentTime + 0.35);
+
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0, ctx.currentTime);
+      noiseGain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.05);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noise.start();
+      noise.stop(ctx.currentTime + 0.45);
+    } catch (e) {}
+  }
+
+  function playChime() {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    try {
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const startT = ctx.currentTime + i * 0.08;
+        gain.gain.setValueAtTime(0, startT);
+        gain.gain.linearRampToValueAtTime(0.2, startT + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, startT + 0.4);
+        osc.start(startT);
+        osc.stop(startT + 0.5);
+      });
+    } catch (e) {}
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (gameScreen.classList.contains('active')) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (!revealed && !isAnimating && revealBtn.style.display !== 'none') {
+          revealBtn.click();
+        } else if (revealed && nextBtn.style.display !== 'none') {
+          nextBtn.click();
+        }
+      } else if (e.key === 'r' || e.key === 'R') {
+        if (!revealed && !isAnimating) shuffleBtn.click();
+      }
+    }
+  });
+</script>
+</body>
+</html>
